@@ -8,9 +8,11 @@ let view () : ReactElement =
         hero.isFullHeightWithNavbar
         prop.children [
             Bulma.heroBody [
-                Bulma.title.h1 [
-                    prop.text "404: Page Not Found"
-                    text.hasTextCentered
+                Bulma.container [
+                    Bulma.title.h1 [
+                        prop.text "404: Page Not Found"
+                        text.hasTextCentered
+                    ]
                 ]
             ]
         ]

@@ -1,6 +1,7 @@
 module App.App
 
 open Elmish
+open Fable.Core
 open Fable.React
 open Feliz.Bulma
 open Feliz.Router
@@ -11,14 +12,16 @@ open App.Page
 [<RequireQualifiedAccess>]
 type Page =
     | Home
-    | Article of Title
+    | Article of Article.Model
     | NotFound
 
 type Model =
     { CurrentRoute: Router.Route option
       ActivePage: Page }
 
-type Msg = NavigateTo of Router.Route
+type Msg =
+    | NavigateTo of Router.Route
+    | ArticleMsg of Article.Msg
 
 let rec setRoute (optRoute: Router.Route option) model =
     let model = { model with CurrentRoute = optRoute }
@@ -34,9 +37,11 @@ let rec setRoute (optRoute: Router.Route option) model =
         | Router.Route.Home -> { model with ActivePage = Page.Home }, navigate
 
         | Router.Route.Article title ->
+            let articleModel, articleCmd = (Article.init title)
+
             { model with
-                  ActivePage = Page.Article title },
-            navigate
+                  ActivePage = Page.Article articleModel },
+            Cmd.batch [ Cmd.map ArticleMsg articleCmd; navigate ]
 
 let init (location: Router.Route option) =
     setRoute
@@ -45,8 +50,27 @@ let init (location: Router.Route option) =
           ActivePage = Page.Home }
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
-    match msg with
-    | NavigateTo route -> setRoute (Some route) model
+    match model.ActivePage, msg with
+
+    // ---- High Level Updates ----
+
+    | _, NavigateTo route -> setRoute (Some route) model
+
+
+    // ---- Page Updates ----
+
+    | Page.Article articleModel, ArticleMsg articleMsg ->
+        let newArticleModel, articleCmd = Article.update articleMsg articleModel
+
+        { model with
+              ActivePage = Page.Article newArticleModel },
+        Cmd.map ArticleMsg articleCmd
+
+
+    // ---- Default Catch All ----
+    | _, msg ->
+        JS.console.warn ("Message discarded:\n", string msg)
+        model, Cmd.none
 
 let navbar dispatch =
     let internalLinks =
@@ -95,7 +119,7 @@ let view (model: Model) (dispatch: Msg -> unit) : ReactElement =
     let page =
         match model.ActivePage with
         | Page.Home -> Home.view ()
-        | Page.Article title -> Article.view title
+        | Page.Article articleModel -> Article.view articleModel (ArticleMsg >> dispatch)
         | Page.NotFound -> NotFound.view ()
 
     Html.div [ prop.children [ navbar dispatch; page ] ]

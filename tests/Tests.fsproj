@@ -8,7 +8,4 @@
     <ItemGroup>
         <ProjectReference Include="..\src\App.fsproj" />
     </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Fable.Mocha" Version="2.9.1" />
-    </ItemGroup>
 </Project>
