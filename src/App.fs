@@ -21,6 +21,22 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     | NoMsg -> model, Cmd.none
 
 let navbar () =
+    let internalLinks = [ "Home"; "Documentation" ]
+
+    let externalLinks =
+        [ "API", Icon.api, "https://evelios.github.io/fsharp-geometry/reference/index.html"
+          "Source Code", Icon.github, "https://github.com/Evelios/fsharp-geometry"
+          "NuGet Package", Icon.nuget, "https://www.nuget.org/packages/Fsharp.Geometry/" ]
+
+    let navbarStartItem (name: string) = Bulma.navbarItem.a [ prop.text name ]
+
+    let navbarEndItem (name: string, icon: Icon.Icon, url: string) =
+        Bulma.navbarItem.a [
+            prop.target.blank
+            prop.href url
+            prop.children [ Icon.withText icon name ]
+        ]
+
     Bulma.navbar [
         Bulma.color.isPrimary
         prop.children [
@@ -34,15 +50,8 @@ let navbar () =
                 ]
             ]
             Bulma.navbarMenu [
-                Bulma.navbarStart.div [
-                    Bulma.navbarItem.a [ prop.text "Home" ]
-                    Bulma.navbarItem.a [ prop.text "Documentation" ]
-                ]
-                Bulma.navbarEnd.div [
-                    Bulma.navbarItem.a [ Icon.withText Icon.api "API" ]
-                    Bulma.navbarItem.a [ Icon.withText Icon.github "Github" ]
-                    Bulma.navbarItem.a [ Icon.withText Icon.nuget "NuGet Package" ]
-                ]
+                Bulma.navbarStart.div (List.map navbarStartItem internalLinks)
+                Bulma.navbarEnd.div (List.map navbarEndItem externalLinks)
             ]
         ]
     ]
