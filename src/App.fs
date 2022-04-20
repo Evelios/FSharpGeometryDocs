@@ -1,32 +1,23 @@
 module App.App
 
-open Feliz
-open Feliz.Bulma
 open Elmish
+open Fable.React
 
-type State = { Count: int }
+open App.Page
 
-type Msg =
-    | Increment
-    | Decrement
+[<RequireQualifiedAccess>]
+type Page = | Home
 
-let init() = { Count = 0 }, Cmd.none
+type Model = { ActivePage: Page }
 
-let update (msg: Msg) (state: State) =
+type Msg = | NoMsg
+
+let init () = { ActivePage = Page.Home }, Cmd.none
+
+let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
     match msg with
-    | Increment -> { state with Count = state.Count + 1 }, Cmd.none
-    | Decrement -> { state with Count = state.Count - 1 }, Cmd.none
+    | NoMsg -> model, Cmd.none
 
-let view (state: State) (dispatch: Msg -> unit) =
-     Bulma.hero [
-        hero.isMedium
-        color.isPrimary
-        prop.children [
-            Bulma.heroHead  []
-            Bulma.heroBody [
-                Bulma.text.p [
-                    prop.text "FSharp Geometry Documentation"
-                ]
-            ]
-        ]
-    ]
+let view (model: Model) (dispatch: Msg -> unit) : ReactElement=
+    match model.ActivePage with
+    | Page.Home -> Home.view ()
