@@ -1,12 +1,12 @@
 module Main
 
-open App
 open Fable.Core.JsInterop
 
-//importSideEffects "./styles/global.scss"
-
 open Elmish
+open Elmish.Navigation
 open Elmish.React
+
+open App
 
 #if DEBUG
 //open Elmish.Debug
@@ -17,7 +17,7 @@ Program.mkProgram App.init App.update App.view
 #if DEBUG
 //|> Program.withConsoleTrace
 #endif
-//|> Program.toNavigable (UrlParser.parseHash Router.routeParser) App.setRoute
+|> Program.toNavigable (UrlParser.parseHash Router.routeParser) App.setRoute
 |> Program.withReactSynchronous "elmish-app"
 #if DEBUG
 //|> Program.withDebugger

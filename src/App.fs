@@ -3,32 +3,66 @@ module App.App
 open Elmish
 open Fable.React
 open Feliz.Bulma
+open Feliz.Router
 open Feliz
 
 open App.Page
 
 [<RequireQualifiedAccess>]
-type Page = | Home
+type Page =
+    | Home
+    | Article of Title
+    | NotFound
 
-type Model = { ActivePage: Page }
+type Model =
+    { CurrentRoute: Router.Route option
+      ActivePage: Page }
 
-type Msg = | NoMsg
+type Msg = NavigateTo of Router.Route
 
-let init () = { ActivePage = Page.Home }, Cmd.none
+let rec setRoute (optRoute: Router.Route option) model =
+    let model = { model with CurrentRoute = optRoute }
+    let navigate = Router.navigateTo optRoute
+
+    match optRoute with
+    | None ->
+        { model with
+              ActivePage = Page.NotFound },
+        Cmd.none
+    | Some route ->
+        match route with
+        | Router.Route.Home -> { model with ActivePage = Page.Home }, navigate
+
+        | Router.Route.Article title ->
+            { model with
+                  ActivePage = Page.Article title },
+            navigate
+
+let init (location: Router.Route option) =
+    setRoute
+        location
+        { CurrentRoute = None
+          ActivePage = Page.Home }
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
-    | NoMsg -> model, Cmd.none
+    | NavigateTo route -> setRoute (Some route) model
 
-let navbar () =
-    let internalLinks = [ "Home"; "Documentation" ]
+let navbar dispatch =
+    let internalLinks =
+        [ "Home", Router.Home
+          "Documentation", Router.Article "Documentation" ]
 
     let externalLinks =
         [ "API", Icon.api, "https://evelios.github.io/fsharp-geometry/reference/index.html"
           "Source Code", Icon.github, "https://github.com/Evelios/fsharp-geometry"
           "NuGet Package", Icon.nuget, "https://www.nuget.org/packages/Fsharp.Geometry/" ]
 
-    let navbarStartItem (name: string) = Bulma.navbarItem.a [ prop.text name ]
+    let navbarStartItem (name: string, route: Router.Route) =
+        Bulma.navbarItem.a [
+            prop.onClick (fun _ -> NavigateTo route |> dispatch)
+            prop.text name
+        ]
 
     let navbarEndItem (name: string, icon: Icon.Icon, url: string) =
         Bulma.navbarItem.a [
@@ -61,5 +95,7 @@ let view (model: Model) (dispatch: Msg -> unit) : ReactElement =
     let page =
         match model.ActivePage with
         | Page.Home -> Home.view ()
+        | Page.Article title -> Article.view title
+        | Page.NotFound -> NotFound.view ()
 
-    Html.div [ prop.children [ navbar (); page ] ]
+    Html.div [ prop.children [ navbar dispatch; page ] ]

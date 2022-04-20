@@ -4,12 +4,17 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include="index.html" />
+        <Compile Include="Types.fs" />
+        <Compile Include="Router.fs" />
         <Compile Include="Icon.fs" />
         <Compile Include="Page\Home.fs" />
+        <Compile Include="Page\NotFound.fs" />
+        <Compile Include="Page\Article.fs" />
         <Compile Include="App.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Elmish.Navigation" Version="1.0.0" />
         <PackageReference Include="Fable.Elmish.Debugger" Version="3.3.0" />
         <PackageReference Include="Fable.Elmish.HMR" Version="5.2.0" />
         <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
